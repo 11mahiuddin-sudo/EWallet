@@ -1,0 +1,2171 @@
+```html
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>মোবাইল ওয়ালেট | BANGLA QR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Hind Siliguri"', '"Inter"', 'sans-serif'],
+            mono: ['"Inter"', 'monospace'],
+          },
+          colors: {
+            qrMagenta: '#E2136E',
+            qrCrimson: '#C8105C',
+            qrEmerald: '#0E9F6E',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* BANGLA QR পেমেন্ট কার্ড ফ্রেম */
+    .bangla-qr-card {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 16px;
+      border-top: 3px solid #e11d48;
+      border-left: 3px solid #e2136e;
+      border-right: 3px solid #0e9f6e;
+      border-bottom: 5px solid #0e9f6e;
+      box-shadow: 0 14px 30px -14px rgba(226, 19, 110, 0.28);
+    }
+
+    .bangla-qr-brand {
+      color: #dc2626;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+    }
+
+    .bangla-qr-matrix {
+      border: 2.5px solid #e2136e;
+      border-radius: 14px;
+      padding: 10px;
+      background: #fff9fc;
+    }
+
+    .thin-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .thin-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .thin-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen antialiased selection:bg-pink-200 selection:text-pink-950">
+  <div id="walletAppRoot" class="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4">
+
+    <!-- ১. শীর্ষ হেডার: মোবাইল ওয়ালেট + অ্যাডমিন প্যানেল -->
+    <header class="rounded-3xl bg-white border border-slate-200/90 px-4 sm:px-6 py-3.5 shadow-xs flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-qrMagenta to-qrEmerald text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+          BQR
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 truncate">মোবাইল ওয়ালেট</h1>
+            <span class="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold">
+              বরাদ্দ স্টোরেজ: ১০০+ GB (IndexedDB + localStorage)
+            </span>
+          </div>
+          <p class="text-[11px] sm:text-xs text-slate-500 truncate">
+            অ্যাডমিন নম্বর: <span class="font-bold text-slate-700">হাইড (গোপন)</span> • <span id="storageTelemetryLabel" class="font-mono text-slate-600">স্টোরেজ প্রস্তুত</span>
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="openAdminPanelBtn"
+        class="rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white px-4 py-2.5 text-xs sm:text-sm font-bold shadow-xs shrink-0 transition"
+      >
+        অ্যাডমিন প্যানেল
+      </button>
+    </header>
+
+    <!-- ২. লাইভ অ্যাডমিন এসএমএস বার -->
+    <section
+      aria-label="অ্যাডমিন এসএমএস বার"
+      class="rounded-2xl bg-slate-900 text-white px-4 py-3 shadow-sm border border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-3"
+    >
+      <div class="flex items-start sm:items-center gap-3 min-w-0">
+        <span class="rounded-xl bg-qrMagenta text-white px-2.5 py-1 text-[11px] font-bold shrink-0">
+          অ্যাডমিন এসএমএস বার
+        </span>
+        <div class="min-w-0">
+          <p id="liveAdminSmsHeadline" class="text-xs sm:text-sm font-semibold text-slate-100 truncate">
+            এখনো কোনো এসএমএস আসেনি। ক্যাশ ইন, ক্যাশ আউট, রিচার্জ বা পেমেন্ট করলে এখানে এসএমএস দেখা যাবে।
+          </p>
+          <p id="liveAdminSmsSubline" class="text-[11px] text-slate-400 mt-0.5">
+            অ্যাডমিন নম্বর: হাইড (গোপন) • মোট এসএমএস: 0
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 self-end lg:self-center shrink-0">
+        <span id="adminUnreadCountBadge" class="rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 text-[11px] font-bold">
+          0 নতুন
+        </span>
+        <button
+          type="button"
+          id="openInboxFromSmsBarBtn"
+          class="rounded-xl bg-white/10 hover:bg-white/20 active:scale-[0.99] text-white px-3 py-1.5 text-xs font-bold transition"
+        >
+          অ্যাডমিন এসএমএস ইনবক্স
+        </button>
+      </div>
+    </section>
+
+    <!-- ৩. নোটিফিকেশন / বার্তা ব্যানার (alert/confirm এর বদলে) -->
+    <div
+      id="appFeedbackBanner"
+      class="hidden rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold border shadow-xs"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <!-- ৪. অ্যাডমিন পাসওয়ার্ড লগইন মোডাল (পাসওয়ার্ড: 017259610) -->
+    <div
+      id="adminAuthModal"
+      class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="adminAuthModalTitle"
+    >
+      <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl border border-slate-200">
+        <div class="text-center mb-5">
+          <div class="mx-auto mb-3 h-12 w-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
+            A
+          </div>
+          <h2 id="adminAuthModalTitle" class="text-lg font-bold text-slate-900">অ্যাডমিন প্যানেল</h2>
+          <p class="text-xs text-slate-500 mt-1">
+            অ্যাডমিন নম্বর: <strong class="text-slate-800">হাইড (গোপন)</strong>। প্রবেশ করতে পাসওয়ার্ড দিন।
+          </p>
+        </div>
+
+        <form id="adminAuthForm" class="space-y-4">
+          <div>
+            <label for="adminPasswordInput" class="block text-xs font-semibold text-slate-700 mb-1.5">
+              অ্যাডমিন পাসওয়ার্ড <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="password"
+              id="adminPasswordInput"
+              placeholder="অ্যাডমিন পাসওয়ার্ড লিখুন"
+              required
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-mono focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            />
+          </div>
+
+          <p id="adminAuthErrorMsg" class="hidden text-xs font-semibold text-rose-600 text-center">
+            ভুল পাসওয়ার্ড দেওয়া হয়েছে। আবার চেষ্টা করুন।
+          </p>
+
+          <div class="flex items-center gap-2.5">
+            <button
+              type="button"
+              id="closeAdminAuthModalBtn"
+              class="flex-1 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold py-2.5 text-xs sm:text-sm transition"
+            >
+              বাতিল
+            </button>
+            <button
+              type="submit"
+              class="flex-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 text-xs sm:text-sm transition"
+            >
+              প্রবেশ করুন
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ৫. অ্যাডমিন প্যানেল সেকশন (শুধু 017259610 যাচাইয়ের পর দেখা যায়) -->
+    <section
+      id="adminDashboardSection"
+      aria-label="অ্যাডমিন প্যানেল"
+      class="hidden rounded-3xl bg-white p-5 sm:p-7 shadow-md border-2 border-slate-900/15 space-y-6"
+    >
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="rounded-full bg-slate-900 text-white px-3 py-0.5 text-xs font-bold">অ্যাডমিন প্যানেল</span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900">ক্যাশ ইন, স্টোরেজ ব্যাকআপ ও এসএমএস ইনবক্স</h2>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">
+            অ্যাডমিন নম্বর: <strong class="text-slate-800">হাইড (গোপন)</strong> • মোট নিবন্ধিত অ্যাকাউন্ট: <strong id="adminUserCountText" class="font-mono text-slate-900">0</strong>
+          </p>
+        </div>
+
+        <button
+          type="button"
+          id="lockAdminPanelBtn"
+          class="self-start sm:self-center rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.99] text-slate-800 font-bold px-4 py-2 text-xs transition"
+        >
+          লক / বন্ধ করুন
+        </button>
+      </div>
+
+      <!-- স্টোরেজ স্থিতি ও ব্যাকআপ ডাউনলোড / রিস্টোর -->
+      <div class="rounded-2xl bg-emerald-50/70 border border-emerald-200 p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div class="space-y-0.5">
+          <p class="text-xs sm:text-sm font-bold text-emerald-950">
+            বরাদ্দ স্টোরেজ: ১০০+ GB (IndexedDB + localStorage)
+          </p>
+          <p id="adminStorageDetailText" class="text-[11px] sm:text-xs text-emerald-800 font-mono">
+            সকল অ্যাকাউন্ট, সেলফি, লেনদেন ও চ্যাট স্বয়ংক্রিয়ভাবে সংরক্ষিত হচ্ছে।
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            id="adminBackupDownloadBtn"
+            class="rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white px-3.5 py-2 text-xs font-bold transition"
+          >
+            ব্যাকআপ ডাউনলোড
+          </button>
+          <button
+            type="button"
+            id="adminBackupRestoreBtn"
+            class="rounded-xl bg-white hover:bg-emerald-100 active:scale-[0.99] text-emerald-900 border border-emerald-300 px-3.5 py-2 text-xs font-bold transition"
+          >
+            ব্যাকআপ রিস্টোর
+          </button>
+          <input
+            type="file"
+            id="adminBackupFileInput"
+            accept="application/json,.json"
+            class="hidden"
+          />
+        </div>
+      </div>
+
+      <!-- ক্যাশ ইন ফর্ম (ব্যবহারকারী নির্বাচন বা নম্বর + পরিমাণ + ব্যালেন্স বৃদ্ধি + লেনদেন + অ্যাডমিন এসএমএস) -->
+      <div class="rounded-2xl bg-slate-50 border border-slate-200/90 p-4 sm:p-5 space-y-4">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">ক্যাশ ইন (অ্যাডমিন)</h3>
+          <p class="text-xs text-slate-500">ব্যবহারকারী নির্বাচন করুন বা ১১ সংখ্যার মোবাইল নম্বর লিখে ব্যালেন্স যুক্ত করুন</p>
+        </div>
+
+        <form id="adminCashInForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+          <div>
+            <label for="adminCashInUserSelect" class="block text-xs font-semibold text-slate-700 mb-1">
+              নিবন্ধিত ব্যবহারকারী
+            </label>
+            <select
+              id="adminCashInUserSelect"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 focus:border-slate-900 focus:outline-none"
+            ></select>
+          </div>
+
+          <div>
+            <label for="adminCashInMobileInput" class="block text-xs font-semibold text-slate-700 mb-1">
+              মোবাইল নম্বর (১১ ডিজিট) <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="tel"
+              id="adminCashInMobileInput"
+              inputmode="numeric"
+              maxlength="11"
+              placeholder="01XXXXXXXXX"
+              required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-mono focus:border-slate-900 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="adminCashInAmountInput" class="block text-xs font-semibold text-slate-700 mb-1">
+              ক্যাশ ইন পরিমাণ (৳) <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="number"
+              id="adminCashInAmountInput"
+              min="1"
+              step="0.01"
+              placeholder="যেমন: 1000"
+              required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-mono focus:border-slate-900 focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold py-2.5 px-4 text-xs sm:text-sm shadow-xs transition"
+          >
+            ক্যাশ ইন করুন
+          </button>
+        </form>
+      </div>
+
+      <!-- অ্যাডমিন এসএমএস ইনবক্স (ফিল্টার: সব, ক্যাশ ইন, ক্যাশ আউট, রিচার্জ, পেমেন্ট) -->
+      <div id="adminSmsInboxSection" class="rounded-2xl bg-slate-50 border border-slate-200/90 p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-slate-900">অ্যাডমিন এসএমএস ইনবক্স</h3>
+            <p class="text-xs text-slate-500">ক্যাশ ইন, ক্যাশ আউট, রিচার্জ ও পেমেন্ট অ্যালার্ট</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5" id="adminSmsFilterBar">
+            <button type="button" data-sms-filter="all" class="sms-filter-btn rounded-xl px-3 py-1.5 text-xs font-bold transition">সব</button>
+            <button type="button" data-sms-filter="cash_in" class="sms-filter-btn rounded-xl px-3 py-1.5 text-xs font-bold transition">ক্যাশ ইন</button>
+            <button type="button" data-sms-filter="cash_out" class="sms-filter-btn rounded-xl px-3 py-1.5 text-xs font-bold transition">ক্যাশ আউট</button>
+            <button type="button" data-sms-filter="recharge" class="sms-filter-btn rounded-xl px-3 py-1.5 text-xs font-bold transition">রিচার্জ</button>
+            <button type="button" data-sms-filter="payment" class="sms-filter-btn rounded-xl px-3 py-1.5 text-xs font-bold transition">পেমেন্ট</button>
+          </div>
+        </div>
+
+        <div id="adminSmsInboxFeed" class="max-h-72 overflow-y-auto thin-scroll divide-y divide-slate-200/80 rounded-xl bg-white border border-slate-200 px-3.5">
+          <!-- JS দিয়ে রেন্ডার হবে -->
+        </div>
+      </div>
+
+      <!-- আদার্স একাউন্ট / নিবন্ধিত ব্যবহারকারী, সেলফি ও সাম্প্রতিক লেনদেন (শুধু অ্যাডমিন দেখতে পারবেন) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-slate-900">আদার্স একাউন্ট / নিবন্ধিত ব্যবহারকারী, সেলফি ও সাম্প্রতিক লেনদেন</h3>
+            <p class="text-xs text-slate-500">শুধুমাত্র অ্যাডমিন প্যানেলে দৃশ্যমান • সকল অ্যাকাউন্টের সেলফি, নম্বর, ব্যালেন্স ও লেনদেন</p>
+          </div>
+          <span class="rounded-full bg-slate-900 text-white px-3 py-1 text-[11px] font-bold">
+            শুধু অ্যাডমিন দৃশ্যমান
+          </span>
+        </div>
+
+        <div id="adminUsersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- JS দিয়ে রেন্ডার হবে -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ৬. লগইন ও নতুন অ্যাকাউন্ট নিবন্ধন সেকশন (সাধারণ ইউজার অন্য কোনো অ্যাকাউন্ট দেখবেন না) -->
+    <section id="authGatewaySection" aria-label="লগইন ও নতুন অ্যাকাউন্ট" class="max-w-xl mx-auto">
+      <div class="rounded-3xl bg-white p-5 sm:p-7 shadow-xs border border-slate-200/90 space-y-5">
+        <div class="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5" role="tablist">
+          <button
+            type="button"
+            id="tabLoginBtn"
+            role="tab"
+            aria-selected="true"
+            class="rounded-xl py-2.5 text-xs sm:text-sm font-bold transition bg-white text-qrMagenta shadow-xs"
+          >
+            লগইন
+          </button>
+          <button
+            type="button"
+            id="tabRegisterBtn"
+            role="tab"
+            aria-selected="false"
+            class="rounded-xl py-2.5 text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900"
+          >
+            নতুন অ্যাকাউন্ট খুলুন
+          </button>
+        </div>
+
+        <!-- লগইন ফর্ম -->
+        <form id="loginAccountForm" class="space-y-4">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900">অ্যাকাউন্টে লগইন করুন</h2>
+            <p class="text-xs text-slate-500 mt-0.5">১১ সংখ্যার মোবাইল নম্বর ও পাসওয়ার্ড দিয়ে আপনার অ্যাকাউন্টে প্রবেশ করুন।</p>
+          </div>
+
+          <div>
+            <label for="loginMobileField" class="block text-xs font-semibold text-slate-700 mb-1">
+              মোবাইল নম্বর (১১ ডিজিট) <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="tel"
+              id="loginMobileField"
+              inputmode="numeric"
+              maxlength="11"
+              placeholder="01XXXXXXXXX"
+              required
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-mono focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+            />
+          </div>
+
+          <div>
+            <label for="loginPasswordField" class="block text-xs font-semibold text-slate-700 mb-1">
+              পাসওয়ার্ড <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="password"
+              id="loginPasswordField"
+              placeholder="আপনার পাসওয়ার্ড লিখুন"
+              required
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-gradient-to-r from-qrMagenta to-qrEmerald hover:opacity-95 active:scale-[0.99] text-white font-bold py-3 text-sm shadow-sm transition"
+          >
+            লগইন করুন
+          </button>
+        </form>
+
+        <!-- নতুন অ্যাকাউন্ট নিবন্ধন ফর্ম -->
+        <form id="registerAccountForm" class="hidden space-y-4">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900">নতুন অ্যাকাউন্ট খুলুন</h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              নাম, ইউনিক ১১ সংখ্যার মোবাইল নম্বর, কাস্টম পাসওয়ার্ড এবং বাধ্যতামূলক সেলফি ভেরিফিকেশন সম্পন্ন করুন।
+            </p>
+          </div>
+
+          <div>
+            <label for="regFullNameField" class="block text-xs font-semibold text-slate-700 mb-1">
+              পূর্ণ নাম <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="text"
+              id="regFullNameField"
+              placeholder="আপনার পূর্ণ নাম লিখুন"
+              required
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+            />
+          </div>
+
+          <div>
+            <label for="regMobileField" class="block text-xs font-semibold text-slate-700 mb-1">
+              মোবাইল নম্বর (০১ দিয়ে শুরু, ১১ ডিজিট) <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="tel"
+              id="regMobileField"
+              inputmode="numeric"
+              maxlength="11"
+              placeholder="01XXXXXXXXX"
+              required
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-mono focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+            />
+          </div>
+
+          <div>
+            <label for="regPasswordField" class="block text-xs font-semibold text-slate-700 mb-1">
+              কাস্টম পাসওয়ার্ড (ন্যূনতম ৪ অক্ষর) <span class="text-rose-600">*</span>
+            </label>
+            <input
+              type="password"
+              id="regPasswordField"
+              minlength="4"
+              placeholder="আপনার পছন্দমতো পাসওয়ার্ড লিখুন"
+              required
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+            />
+          </div>
+
+          <!-- বাধ্যতামূলক সেলফি ভেরিফিকেশন (৩টি নির্ভরযোগ্য উপায়) -->
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div>
+                <span class="text-xs sm:text-sm font-bold text-slate-900">
+                  সেলফি ভেরিফিকেশন (বাধ্যতামূলক) <span class="text-rose-600">*</span>
+                </span>
+                <p class="text-[11px] text-slate-500">
+                  লাইভ ক্যামেরা, ফাইল/গ্যালারি আপলোড অথবা তাৎক্ষণিক সেলফি ভেরিফাই ব্যবহার করুন।
+                </p>
+              </div>
+              <span id="selfieStatusPill" class="rounded-full bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold">
+                সেলফি যাচাই হয়নি
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                id="openCamBtn"
+                class="rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold px-3 py-2 text-xs transition"
+              >
+                ক্যামেরা চালু করুন
+              </button>
+              <button
+                type="button"
+                id="captureCamBtn"
+                disabled
+                class="rounded-xl bg-qrMagenta hover:bg-qrCrimson disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] text-white font-bold px-3 py-2 text-xs transition"
+              >
+                ক্যাপচার করুন
+              </button>
+              <button
+                type="button"
+                id="triggerGalleryUploadBtn"
+                class="rounded-xl border border-slate-300 bg-white hover:bg-slate-100 active:scale-[0.99] text-slate-800 font-bold px-3 py-2 text-xs transition"
+              >
+                ফাইল/গ্যালারি থেকে আপলোড
+              </button>
+              <button
+                type="button"
+                id="instantVerifySelfieBtn"
+                class="rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold px-3 py-2 text-xs transition"
+              >
+                তাৎক্ষণিক সেলফি ভেরিফাই
+              </button>
+            </div>
+
+            <input
+              type="file"
+              id="gallerySelfieFileInput"
+              accept="image/*"
+              class="hidden"
+            />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div class="rounded-xl bg-slate-900 overflow-hidden aspect-video flex items-center justify-center border border-slate-300">
+                <video id="selfieLiveVideo" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+                <span id="selfieLivePlaceholder" class="text-[11px] text-slate-300 px-3 text-center">
+                  ক্যামেরা চালু করলে প্রিভিউ এখানে দেখা যাবে
+                </span>
+              </div>
+
+              <div class="rounded-xl bg-white overflow-hidden aspect-video flex items-center justify-center border border-slate-300">
+                <img id="selfieVerifiedPreviewImg" alt="ভেরিফায়েড সেলফি" class="w-full h-full object-cover hidden" />
+                <span id="selfieVerifiedPlaceholder" class="text-[11px] text-slate-400 px-3 text-center">
+                  ভেরিফায়েড সেলফি এখানে দেখা যাবে
+                </span>
+              </div>
+            </div>
+
+            <canvas id="selfieCaptureCanvas" class="hidden"></canvas>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-qrMagenta hover:bg-qrCrimson active:scale-[0.99] text-white font-bold py-3 text-sm shadow-sm transition"
+          >
+            অ্যাকাউন্ট তৈরি করুন
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ৭. লগইনকৃত ব্যবহারকারীর ওয়ালেট প্রোফাইল (শুধু নিজের অ্যাকাউন্ট দৃশ্যমান) -->
+    <main id="userProfileSection" class="hidden space-y-5">
+      <header class="rounded-3xl bg-gradient-to-br from-qrMagenta via-[#c91161] to-qrEmerald text-white p-5 sm:p-7 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-white/20">
+          <div class="flex items-center gap-3.5 min-w-0">
+            <img
+              id="activeUserSelfieImg"
+              alt="ব্যবহারকারীর ভেরিফায়েড সেলফি"
+              class="h-14 w-14 rounded-2xl object-cover bg-white border-2 border-white shadow-sm shrink-0"
+            />
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h2 id="activeUserNameText" class="text-lg sm:text-xl font-bold truncate">ব্যবহারকারীর নাম</h2>
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold">সেলফি ভেরিফাইড</span>
+              </div>
+              <p id="activeUserMobileText" class="text-xs sm:text-sm font-mono font-bold text-white/95 mt-0.5">
+                01XXXXXXXXX
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="userLogoutBtn"
+            class="rounded-xl bg-white/15 hover:bg-white/25 active:scale-[0.99] px-4 py-2 text-xs font-bold backdrop-blur-xs transition"
+          >
+            লগআউট
+          </button>
+        </div>
+
+        <div class="pt-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold text-white/90">বর্তমান ব্যালেন্স</p>
+            <div class="mt-1 flex items-center gap-3 flex-wrap">
+              <span id="activeUserBalanceText" class="text-2xl sm:text-3xl font-bold font-mono tracking-tight">৳ 0.00</span>
+              <button
+                type="button"
+                id="toggleBalanceMaskBtn"
+                class="rounded-xl bg-white/20 hover:bg-white/30 active:scale-[0.99] px-3.5 py-1.5 text-xs font-bold transition"
+              >
+                ব্যালেন্স লুকান
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-black/20 px-4 py-2.5 text-xs">
+            <div class="text-white/80">অ্যাকাউন্ট তৈরির সময়</div>
+            <div id="activeUserCreatedAtText" class="font-semibold text-white mt-0.5">—</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- প্রোফাইল লেনদেন বাটন: ক্যাশ আউট, রিচার্জ, পেমেন্ট -->
+      <section aria-label="লেনদেন অপশন" class="rounded-3xl bg-white p-5 sm:p-6 shadow-xs border border-slate-200/90 space-y-4">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">লেনদেন করুন</h3>
+          <p class="text-xs text-slate-500">ক্যাশ আউট, রিচার্জ বা পেমেন্ট-এ ক্লিক করে BANGLA QR পপআপ থেকে লেনদেন সম্পন্ন করুন</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <button
+            type="button"
+            data-tx-type="cash_out"
+            class="profile-tx-trigger rounded-2xl border-2 border-pink-200 bg-pink-50/70 hover:bg-pink-100/80 active:scale-[0.99] p-4 text-left transition"
+          >
+            <div class="text-sm sm:text-base font-bold text-qrMagenta">ক্যাশ আউট</div>
+            <div class="text-xs text-slate-600 mt-0.5">BANGLA QR দিয়ে ক্যাশ আউট</div>
+          </button>
+
+          <button
+            type="button"
+            data-tx-type="recharge"
+            class="profile-tx-trigger rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/80 active:scale-[0.99] p-4 text-left transition"
+          >
+            <div class="text-sm sm:text-base font-bold text-qrEmerald">রিচার্জ</div>
+            <div class="text-xs text-slate-600 mt-0.5">BANGLA QR দিয়ে মোবাইল রিচার্জ</div>
+          </button>
+
+          <button
+            type="button"
+            data-tx-type="payment"
+            class="profile-tx-trigger rounded-2xl border-2 border-rose-200 bg-rose-50/70 hover:bg-rose-100/80 active:scale-[0.99] p-4 text-left transition"
+          >
+            <div class="text-sm sm:text-base font-bold text-rose-700">পেমেন্ট</div>
+            <div class="text-xs text-slate-600 mt-0.5">BANGLA QR দিয়ে পেমেন্ট</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- লেনদেনের ইতিহাস -->
+      <section aria-label="লেনদেনের ইতিহাস" class="rounded-3xl bg-white p-5 sm:p-6 shadow-xs border border-slate-200/90">
+        <div class="mb-3">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">লেনদেনের ইতিহাস</h3>
+          <p class="text-xs text-slate-500">আপনার সকল ক্যাশ ইন, ক্যাশ আউট, রিচার্জ ও পেমেন্ট রেকর্ড</p>
+        </div>
+        <div id="userHistoryList" class="divide-y divide-slate-100">
+          <!-- JS দিয়ে রেন্ডার হবে -->
+        </div>
+      </section>
+    </main>
+
+    <!-- ৮. BANGLA QR লেনদেন মোডাল -->
+    <div
+      id="banglaQrTxModal"
+      class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="qrModalTitleText"
+    >
+      <div class="w-full max-w-2xl rounded-3xl bg-white p-5 sm:p-6 shadow-2xl border border-slate-200 my-auto space-y-5">
+        <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-200">
+          <div>
+            <span class="rounded-full bg-pink-50 text-qrMagenta border border-pink-200 px-2.5 py-0.5 text-[11px] font-bold">
+              BANGLA QR
+            </span>
+            <h2 id="qrModalTitleText" class="text-lg sm:text-xl font-bold text-slate-900 mt-1">ক্যাশ আউট</h2>
+          </div>
+          <button
+            type="button"
+            id="closeQrModalBtn"
+            class="rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2 text-xs transition"
+          >
+            বন্ধ করুন
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+          <!-- ভিজ্যুয়াল BANGLA QR কার্ড -->
+          <div class="md:col-span-5">
+            <div class="bangla-qr-card text-center space-y-2.5">
+              <div class="bangla-qr-brand text-sm sm:text-base font-mono uppercase">BANGLA QR</div>
+              <div class="bangla-qr-matrix flex items-center justify-center">
+                <div id="qrSvgHolder" class="w-40 h-40"></div>
+              </div>
+              <div class="pt-1 space-y-0.5">
+                <p id="qrCardNameText" class="text-sm font-bold text-slate-900 truncate">ব্যবহারকারীর নাম</p>
+                <p id="qrCardMobileText" class="text-sm font-mono font-extrabold text-qrMagenta">01XXXXXXXXX</p>
+                <p id="qrCardTypeText" class="text-[11px] font-semibold text-qrEmerald">ক্যাশ আউট</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- লেনদেন নিশ্চিতকরণ ফর্ম -->
+          <div class="md:col-span-7">
+            <form id="banglaQrConfirmForm" class="space-y-3.5">
+              <div>
+                <label for="qrDestinationMobileInput" id="qrDestinationMobileLabel" class="block text-xs font-semibold text-slate-700 mb-1">
+                  প্রাপক / এজেন্ট মোবাইল নম্বর (১১ ডিজিট) <span class="text-rose-600">*</span>
+                </label>
+                <input
+                  type="tel"
+                  id="qrDestinationMobileInput"
+                  inputmode="numeric"
+                  maxlength="11"
+                  placeholder="01XXXXXXXXX"
+                  required
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm font-mono focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+                />
+              </div>
+
+              <div>
+                <label for="qrTxAmountInput" class="block text-xs font-semibold text-slate-700 mb-1">
+                  টাকার পরিমাণ (৳) <span class="text-rose-600">*</span>
+                </label>
+                <input
+                  type="number"
+                  id="qrTxAmountInput"
+                  min="1"
+                  step="0.01"
+                  placeholder="যেমন: 500"
+                  required
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm font-mono focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+                />
+                <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                  <button type="button" data-amount-preset="100" class="preset-amt-btn rounded-lg border border-slate-200 bg-slate-50 hover:bg-pink-50 hover:text-qrMagenta px-2.5 py-1 text-[11px] font-mono font-bold text-slate-700 transition">৳100</button>
+                  <button type="button" data-amount-preset="500" class="preset-amt-btn rounded-lg border border-slate-200 bg-slate-50 hover:bg-pink-50 hover:text-qrMagenta px-2.5 py-1 text-[11px] font-mono font-bold text-slate-700 transition">৳500</button>
+                  <button type="button" data-amount-preset="1000" class="preset-amt-btn rounded-lg border border-slate-200 bg-slate-50 hover:bg-pink-50 hover:text-qrMagenta px-2.5 py-1 text-[11px] font-mono font-bold text-slate-700 transition">৳1,000</button>
+                  <button type="button" data-amount-preset="2000" class="preset-amt-btn rounded-lg border border-slate-200 bg-slate-50 hover:bg-pink-50 hover:text-qrMagenta px-2.5 py-1 text-[11px] font-mono font-bold text-slate-700 transition">৳2,000</button>
+                </div>
+              </div>
+
+              <!-- রিচার্জের জন্য অপারেটর সিলেক্টর -->
+              <div id="qrOperatorSelectWrap" class="hidden">
+                <label for="qrOperatorSelect" class="block text-xs font-semibold text-slate-700 mb-1">
+                  মোবাইল অপারেটর নির্বাচন করুন
+                </label>
+                <select
+                  id="qrOperatorSelect"
+                  class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+                >
+                  <option value="Grameenphone">Grameenphone</option>
+                  <option value="Robi">Robi</option>
+                  <option value="Banglalink">Banglalink</option>
+                  <option value="Airtel">Airtel</option>
+                  <option value="Teletalk">Teletalk</option>
+                </select>
+              </div>
+
+              <!-- পেমেন্ট বা অতিরিক্ত নোটের জন্য রেফারেন্স ইনপুট -->
+              <div id="qrReferenceWrap">
+                <label for="qrExtraMetaInput" id="qrExtraMetaLabel" class="block text-xs font-semibold text-slate-700 mb-1">
+                  রেফারেন্স / নোট (ঐচ্ছিক)
+                </label>
+                <input
+                  type="text"
+                  id="qrExtraMetaInput"
+                  placeholder="যেমন: ইনভয়েস বা রেফারেন্স কোড"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+                />
+              </div>
+
+              <button
+                type="submit"
+                id="qrConfirmSubmitBtn"
+                class="w-full rounded-xl bg-qrMagenta hover:bg-qrCrimson active:scale-[0.99] text-white font-bold py-2.5 text-xs sm:text-sm shadow-xs transition"
+              >
+                নিশ্চিত করুন
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ৯. সবসময় খোলা চ্যাটিং বক্স -->
+    <section
+      id="alwaysOpenChatBoxSection"
+      aria-label="চ্যাটিং বক্স"
+      class="rounded-3xl bg-white p-5 sm:p-6 shadow-xs border border-slate-200/90 space-y-4"
+    >
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 inline-block"></span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">চ্যাটিং বক্স</h2>
+          <span class="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold">
+            সর্বদা খোলা
+          </span>
+        </div>
+        <span class="text-xs text-slate-500">
+          অ্যাডমিন পরিচয়: <strong class="text-slate-700">হাইড (গোপন)</strong>
+        </span>
+      </div>
+
+      <div id="chatThreadFeed" class="h-60 overflow-y-auto thin-scroll rounded-2xl bg-slate-50 border border-slate-200/80 p-3.5 space-y-2.5">
+        <!-- JS দিয়ে রেন্ডার হবে -->
+      </div>
+
+      <form id="chatMessageForm" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <input
+          type="text"
+          id="chatSenderNameField"
+          placeholder="আপনার নাম (ঐচ্ছিক)"
+          class="sm:w-44 rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm focus:bg-white focus:border-qrMagenta focus:outline-none"
+        />
+        <input
+          type="text"
+          id="chatMessageTextField"
+          placeholder="চ্যাটিং বক্সে বার্তা লিখুন..."
+          required
+          class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-xs sm:text-sm focus:border-qrMagenta focus:outline-none focus:ring-2 focus:ring-pink-200"
+        />
+        <button
+          type="submit"
+          class="rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold px-5 py-2.5 text-xs sm:text-sm shrink-0 transition"
+        >
+          পাঠান
+        </button>
+      </form>
+    </section>
+
+    <footer class="text-center text-xs text-slate-500 py-2 px-4">
+      মোবাইল ওয়ালেট • অ্যাডমিন নম্বর: হাইড (গোপন) • বরাদ্দ স্টোরেজ: ১০০+ GB (IndexedDB + localStorage)
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'bangla_qr_mobile_wallet_state_v2';
+      const IDB_DB_NAME = 'BanglaQrMobileWalletDB_v2';
+      const IDB_STORE_NAME = 'wallet_store';
+      const IDB_RECORD_ID = 'primary_state';
+      const ADMIN_PASSCODE = '017259610';
+      const HIDDEN_ADMIN_TEXT = 'হাইড (গোপন)';
+      const ALLOCATED_GB = 100;
+
+      const TX_CONFIG = {
+        cash_in: {
+          key: 'cash_in',
+          label: 'ক্যাশ ইন',
+          direction: 'in',
+          mobilePrompt: 'ব্যবহারকারীর মোবাইল নম্বর (১১ ডিজিট)',
+          metaPrompt: 'রেফারেন্স / নোট (ঐচ্ছিক)'
+        },
+        cash_out: {
+          key: 'cash_out',
+          label: 'ক্যাশ আউট',
+          direction: 'out',
+          mobilePrompt: 'এজেন্ট মোবাইল নম্বর (১১ ডিজিট)',
+          metaPrompt: 'এজেন্ট / রেফারেন্স কোড (ঐচ্ছিক)'
+        },
+        recharge: {
+          key: 'recharge',
+          label: 'রিচার্জ',
+          direction: 'out',
+          mobilePrompt: 'রিচার্জ মোবাইল নম্বর (১১ ডিজিট)',
+          metaPrompt: 'প্যাকেজ / রেফারেন্স (ঐচ্ছিক)'
+        },
+        payment: {
+          key: 'payment',
+          label: 'পেমেন্ট',
+          direction: 'out',
+          mobilePrompt: 'মার্চেন্ট / প্রাপক মোবাইল নম্বর (১১ ডিজিট)',
+          metaPrompt: 'ইনভয়েস / রেফারেন্স (ঐচ্ছিক)'
+        }
+      };
+
+      function sanitizeMobile(val) {
+        return String(val || '').replace(/\D/g, '').trim();
+      }
+
+      function isValidMobile11(mobile) {
+        return /^01\d{9}$/.test(mobile);
+      }
+
+      function formatMoney(amount) {
+        const n = Number(amount);
+        if (Number.isNaN(n)) return '৳ 0.00';
+        return '৳ ' + n.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function nowFormatted() {
+        return new Date().toLocaleString('bn-BD', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+      }
+
+      function escapeText(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // ভেরিফায়েড সেলফি / প্রোফাইল ক্যানভাস ইমেজ তৈরি
+      function createSelfieAvatarDataUrl(name, mobile, paletteIndex) {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 360;
+          canvas.height = 240;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return '';
+
+          const palettes = [
+            ['#E2136E', '#0E9F6E'],
+            ['#0F766E', '#E2136E'],
+            ['#BE185D', '#047857']
+          ];
+          const pair = palettes[Math.abs(Number(paletteIndex) || 0) % palettes.length];
+
+          const grad = ctx.createLinearGradient(0, 0, 360, 240);
+          grad.addColorStop(0, pair[0]);
+          grad.addColorStop(1, pair[1]);
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 360, 240);
+
+          ctx.fillStyle = 'rgba(255,255,255,0.92)';
+          ctx.beginPath();
+          ctx.arc(180, 86, 38, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(180, 198, 60, Math.PI, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+          ctx.fillRect(0, 196, 360, 44);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 13px sans-serif';
+          ctx.textAlign = 'center';
+          const label = `${String(name || 'সদস্য').slice(0, 20)} • ${mobile || '01XXXXXXXXX'}`;
+          ctx.fillText(label, 180, 223);
+
+          return canvas.toDataURL('image/jpeg', 0.88);
+        } catch (err) {
+          return '';
+        }
+      }
+
+      // BANGLA QR ম্যাট্রিক্স SVG জেনারেটর
+      function renderBanglaQrMatrixSvg(seedString) {
+        const gridSize = 25;
+        let hash = 2166136261;
+        for (let i = 0; i < seedString.length; i++) {
+          hash ^= seedString.charCodeAt(i);
+          hash = Math.imul(hash, 16777619);
+        }
+
+        function isFinderZone(r, c) {
+          return (r < 7 && c < 7) || (r < 7 && c >= gridSize - 7) || (r >= gridSize - 7 && c < 7);
+        }
+
+        function isFinderDark(r, c) {
+          const lr = r >= gridSize - 7 ? r - (gridSize - 7) : r;
+          const lc = c >= gridSize - 7 ? c - (gridSize - 7) : c;
+          const rim = lr === 0 || lr === 6 || lc === 0 || lc === 6;
+          const dot = lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4;
+          return rim || dot;
+        }
+
+        let rects = '';
+        for (let r = 0; r < gridSize; r++) {
+          for (let c = 0; c < gridSize; c++) {
+            let dark = false;
+            if (isFinderZone(r, c)) {
+              dark = isFinderDark(r, c);
+            } else {
+              const mixed = (hash ^ Math.imul(r + 17, 374761393) ^ Math.imul(c + 31, 668265263)) >>> 0;
+              dark = (mixed % 100) < 48;
+            }
+            if (dark) {
+              rects += `<rect x="${c}" y="${r}" width="1" height="1" fill="#E2136E"/>`;
+            }
+          }
+        }
+
+        return `<svg viewBox="0 0 ${gridSize} ${gridSize}" class="w-full h-full" shape-rendering="crispEdges" aria-label="BANGLA QR ম্যাট্রিক্স">${rects}</svg>`;
+      }
+
+      // IndexedDB হেল্পার
+      function openIdbConnection() {
+        return new Promise((resolve) => {
+          if (!window.indexedDB) {
+            resolve(null);
+            return;
+          }
+          try {
+            const req = window.indexedDB.open(IDB_DB_NAME, 1);
+            req.onupgradeneeded = function () {
+              const db = req.result;
+              if (!db.objectStoreNames.contains(IDB_STORE_NAME)) {
+                db.createObjectStore(IDB_STORE_NAME);
+              }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+          } catch (err) {
+            resolve(null);
+          }
+        });
+      }
+
+      async function saveToIdb(dataObj) {
+        const db = await openIdbConnection();
+        if (!db) return;
+        try {
+          await new Promise((resolve) => {
+            const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+            tx.objectStore(IDB_STORE_NAME).put(dataObj, IDB_RECORD_ID);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+          });
+        } catch (err) {
+          // ত্রুটি এড়িয়ে চলা হচ্ছে
+        }
+      }
+
+      async function loadFromIdb() {
+        const db = await openIdbConnection();
+        if (!db) return null;
+        try {
+          return await new Promise((resolve) => {
+            const tx = db.transaction(IDB_STORE_NAME, 'readonly');
+            const req = tx.objectStore(IDB_STORE_NAME).get(IDB_RECORD_ID);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+          });
+        } catch (err) {
+          return null;
+        }
+      }
+
+      // প্রথমবার কোনো সেভ না থাকলে ২টি বাস্তবসম্মত বাংলা অ্যাকাউন্ট তৈরি (শুধু অ্যাডমিন প্যানেলে দেখা যাবে)
+      function buildInitialSeededState() {
+        const ts = nowFormatted();
+        const u1Mobile = '01711223344';
+        const u2Mobile = '01819887766';
+
+        const users = {
+          [u1Mobile]: {
+            name: 'তানভীর আহমেদ',
+            mobile: u1Mobile,
+            password: '1234',
+            balance: 4500.0,
+            selfieDataUrl: createSelfieAvatarDataUrl('তানভীর আহমেদ', u1Mobile, 0),
+            createdAt: ts,
+            transactions: [
+              {
+                id: 'seed-tx-1',
+                type: 'cash_in',
+                label: 'ক্যাশ ইন',
+                direction: 'in',
+                counterpartyMobile: u1Mobile,
+                amount: 4500.0,
+                meta: 'অ্যাকাউন্ট ব্যালেন্স',
+                timestamp: ts
+              }
+            ]
+          },
+          [u2Mobile]: {
+            name: 'নুসরাত জাহান',
+            mobile: u2Mobile,
+            password: '1234',
+            balance: 3200.0,
+            selfieDataUrl: createSelfieAvatarDataUrl('নুসরাত জাহান', u2Mobile, 1),
+            createdAt: ts,
+            transactions: [
+              {
+                id: 'seed-tx-2',
+                type: 'cash_in',
+                label: 'ক্যাশ ইন',
+                direction: 'in',
+                counterpartyMobile: u2Mobile,
+                amount: 3200.0,
+                meta: 'অ্যাকাউন্ট ব্যালেন্স',
+                timestamp: ts
+              }
+            ]
+          }
+        };
+
+        return {
+          users,
+          currentUserMobile: null,
+          adminUnlocked: false,
+          balanceMasked: false,
+          smsFilter: 'all',
+          smsAlerts: [],
+          chatHistory: [
+            {
+              id: 'chat-init-1',
+              sender: `সাপোর্ট (${HIDDEN_ADMIN_TEXT})`,
+              isAdminSide: true,
+              message: 'চ্যাটিং বক্স খোলা আছে। আপনার বার্তা লিখুন।',
+              timestamp: ts
+            }
+          ]
+        };
+      }
+
+      function normalizeStateShape(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        const usersObj = raw.users && typeof raw.users === 'object' ? raw.users : {};
+        const validCurrentMobile = typeof raw.currentUserMobile === 'string' && usersObj[raw.currentUserMobile]
+          ? raw.currentUserMobile
+          : null;
+        const validFilters = ['all', 'cash_in', 'cash_out', 'recharge', 'payment'];
+        const smsFilter = validFilters.includes(raw.smsFilter) ? raw.smsFilter : 'all';
+
+        return {
+          users: usersObj,
+          currentUserMobile: validCurrentMobile,
+          adminUnlocked: Boolean(raw.adminUnlocked),
+          balanceMasked: Boolean(raw.balanceMasked),
+          smsFilter,
+          smsAlerts: Array.isArray(raw.smsAlerts) ? raw.smsAlerts : [],
+          chatHistory: Array.isArray(raw.chatHistory) && raw.chatHistory.length > 0
+            ? raw.chatHistory
+            : [
+                {
+                  id: 'chat-init-1',
+                  sender: `সাপোর্ট (${HIDDEN_ADMIN_TEXT})`,
+                  isAdminSide: true,
+                  message: 'চ্যাটিং বক্স খোলা আছে। আপনার বার্তা লিখুন।',
+                  timestamp: nowFormatted()
+                }
+              ]
+        };
+      }
+
+      function readLocalStorageState() {
+        try {
+          const rawStr = localStorage.getItem(STORAGE_KEY);
+          if (!rawStr) return null;
+          return normalizeStateShape(JSON.parse(rawStr));
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function persistStateEverywhere(nextState) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+        } catch (err) {
+          showFeedback('localStorage-এ সংরক্ষণ করতে সমস্যা হয়েছে।', 'error');
+        }
+        saveToIdb(nextState);
+        updateStorageReadout();
+      }
+
+      // প্রাথমিক স্টেট
+      let appState = readLocalStorageState() || buildInitialSeededState();
+      if (!readLocalStorageState()) {
+        persistStateEverywhere(appState);
+      }
+
+      let verifiedSelfieUrl = '';
+      let activeCameraStream = null;
+      let activeModalTxType = 'cash_out';
+
+      // DOM এলিমেন্ট রেফারেন্স
+      const storageTelemetryLabel = document.getElementById('storageTelemetryLabel');
+      const openAdminPanelBtn = document.getElementById('openAdminPanelBtn');
+
+      const liveAdminSmsHeadline = document.getElementById('liveAdminSmsHeadline');
+      const liveAdminSmsSubline = document.getElementById('liveAdminSmsSubline');
+      const adminUnreadCountBadge = document.getElementById('adminUnreadCountBadge');
+      const openInboxFromSmsBarBtn = document.getElementById('openInboxFromSmsBarBtn');
+
+      const appFeedbackBanner = document.getElementById('appFeedbackBanner');
+
+      const adminAuthModal = document.getElementById('adminAuthModal');
+      const adminAuthForm = document.getElementById('adminAuthForm');
+      const adminPasswordInput = document.getElementById('adminPasswordInput');
+      const adminAuthErrorMsg = document.getElementById('adminAuthErrorMsg');
+      const closeAdminAuthModalBtn = document.getElementById('closeAdminAuthModalBtn');
+
+      const adminDashboardSection = document.getElementById('adminDashboardSection');
+      const lockAdminPanelBtn = document.getElementById('lockAdminPanelBtn');
+      const adminUserCountText = document.getElementById('adminUserCountText');
+      const adminStorageDetailText = document.getElementById('adminStorageDetailText');
+      const adminBackupDownloadBtn = document.getElementById('adminBackupDownloadBtn');
+      const adminBackupRestoreBtn = document.getElementById('adminBackupRestoreBtn');
+      const adminBackupFileInput = document.getElementById('adminBackupFileInput');
+
+      const adminCashInForm = document.getElementById('adminCashInForm');
+      const adminCashInUserSelect = document.getElementById('adminCashInUserSelect');
+      const adminCashInMobileInput = document.getElementById('adminCashInMobileInput');
+      const adminCashInAmountInput = document.getElementById('adminCashInAmountInput');
+
+      const adminSmsInboxSection = document.getElementById('adminSmsInboxSection');
+      const smsFilterBtns = document.querySelectorAll('.sms-filter-btn');
+      const adminSmsInboxFeed = document.getElementById('adminSmsInboxFeed');
+      const adminUsersGrid = document.getElementById('adminUsersGrid');
+
+      const authGatewaySection = document.getElementById('authGatewaySection');
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+      const loginAccountForm = document.getElementById('loginAccountForm');
+      const loginMobileField = document.getElementById('loginMobileField');
+      const loginPasswordField = document.getElementById('loginPasswordField');
+
+      const registerAccountForm = document.getElementById('registerAccountForm');
+      const regFullNameField = document.getElementById('regFullNameField');
+      const regMobileField = document.getElementById('regMobileField');
+      const regPasswordField = document.getElementById('regPasswordField');
+
+      const selfieStatusPill = document.getElementById('selfieStatusPill');
+      const openCamBtn = document.getElementById('openCamBtn');
+      const captureCamBtn = document.getElementById('captureCamBtn');
+      const triggerGalleryUploadBtn = document.getElementById('triggerGalleryUploadBtn');
+      const gallerySelfieFileInput = document.getElementById('gallerySelfieFileInput');
+      const instantVerifySelfieBtn = document.getElementById('instantVerifySelfieBtn');
+      const selfieLiveVideo = document.getElementById('selfieLiveVideo');
+      const selfieLivePlaceholder = document.getElementById('selfieLivePlaceholder');
+      const selfieVerifiedPreviewImg = document.getElementById('selfieVerifiedPreviewImg');
+      const selfieVerifiedPlaceholder = document.getElementById('selfieVerifiedPlaceholder');
+      const selfieCaptureCanvas = document.getElementById('selfieCaptureCanvas');
+
+      const userProfileSection = document.getElementById('userProfileSection');
+      const activeUserSelfieImg = document.getElementById('activeUserSelfieImg');
+      const activeUserNameText = document.getElementById('activeUserNameText');
+      const activeUserMobileText = document.getElementById('activeUserMobileText');
+      const activeUserCreatedAtText = document.getElementById('activeUserCreatedAtText');
+      const activeUserBalanceText = document.getElementById('activeUserBalanceText');
+      const toggleBalanceMaskBtn = document.getElementById('toggleBalanceMaskBtn');
+      const userLogoutBtn = document.getElementById('userLogoutBtn');
+      const profileTxTriggers = document.querySelectorAll('.profile-tx-trigger');
+      const userHistoryList = document.getElementById('userHistoryList');
+
+      const banglaQrTxModal = document.getElementById('banglaQrTxModal');
+      const qrModalTitleText = document.getElementById('qrModalTitleText');
+      const closeQrModalBtn = document.getElementById('closeQrModalBtn');
+      const qrSvgHolder = document.getElementById('qrSvgHolder');
+      const qrCardNameText = document.getElementById('qrCardNameText');
+      const qrCardMobileText = document.getElementById('qrCardMobileText');
+      const qrCardTypeText = document.getElementById('qrCardTypeText');
+      const banglaQrConfirmForm = document.getElementById('banglaQrConfirmForm');
+      const qrDestinationMobileLabel = document.getElementById('qrDestinationMobileLabel');
+      const qrDestinationMobileInput = document.getElementById('qrDestinationMobileInput');
+      const qrTxAmountInput = document.getElementById('qrTxAmountInput');
+      const presetAmtBtns = document.querySelectorAll('.preset-amt-btn');
+      const qrOperatorSelectWrap = document.getElementById('qrOperatorSelectWrap');
+      const qrOperatorSelect = document.getElementById('qrOperatorSelect');
+      const qrReferenceWrap = document.getElementById('qrReferenceWrap');
+      const qrExtraMetaLabel = document.getElementById('qrExtraMetaLabel');
+      const qrExtraMetaInput = document.getElementById('qrExtraMetaInput');
+      const qrConfirmSubmitBtn = document.getElementById('qrConfirmSubmitBtn');
+
+      const chatThreadFeed = document.getElementById('chatThreadFeed');
+      const chatMessageForm = document.getElementById('chatMessageForm');
+      const chatSenderNameField = document.getElementById('chatSenderNameField');
+      const chatMessageTextField = document.getElementById('chatMessageTextField');
+
+      let feedbackTimeoutId = null;
+      function showFeedback(text, kind) {
+        if (feedbackTimeoutId) clearTimeout(feedbackTimeoutId);
+        appFeedbackBanner.classList.remove(
+          'hidden',
+          'bg-emerald-50', 'text-emerald-900', 'border-emerald-300',
+          'bg-rose-50', 'text-rose-900', 'border-rose-300',
+          'bg-sky-50', 'text-sky-900', 'border-sky-300'
+        );
+
+        if (kind === 'success') {
+          appFeedbackBanner.classList.add('bg-emerald-50', 'text-emerald-900', 'border-emerald-300');
+        } else if (kind === 'error') {
+          appFeedbackBanner.classList.add('bg-rose-50', 'text-rose-900', 'border-rose-300');
+        } else {
+          appFeedbackBanner.classList.add('bg-sky-50', 'text-sky-900', 'border-sky-300');
+        }
+
+        appFeedbackBanner.textContent = text;
+        feedbackTimeoutId = setTimeout(() => {
+          appFeedbackBanner.classList.add('hidden');
+        }, 5000);
+      }
+
+      async function updateStorageReadout() {
+        const count = Object.keys(appState.users || {}).length;
+        let bytes = 0;
+        try {
+          bytes = new Blob([JSON.stringify(appState)]).size;
+        } catch (err) {
+          bytes = 0;
+        }
+        const kb = (bytes / 1024).toFixed(1);
+        let quotaGbText = '';
+
+        if (navigator.storage && typeof navigator.storage.estimate === 'function') {
+          try {
+            const est = await navigator.storage.estimate();
+            if (est && est.quota) {
+              quotaGbText = ` • ব্রাউজার কোটা: ${(est.quota / (1024 ** 3)).toFixed(1)} GB`;
+            }
+          } catch (err) {
+            quotaGbText = '';
+          }
+        }
+
+        storageTelemetryLabel.textContent = `${count} অ্যাকাউন্ট • ব্যবহৃত: ${kb} KB${quotaGbText}`;
+        adminStorageDetailText.textContent = `বরাদ্দ স্টোরেজ: ${ALLOCATED_GB}+ GB (IndexedDB + localStorage) • সংরক্ষিত অ্যাকাউন্ট: ${count} টি • মোট ডেটা: ${kb} KB${quotaGbText}`;
+      }
+
+      function getCurrentUser() {
+        if (!appState.currentUserMobile) return null;
+        return appState.users[appState.currentUserMobile] || null;
+      }
+
+      // এসএমএস অ্যালার্ট যোগ করা (অ্যাডমিন এসএমএস বার ও ইনবক্সে)
+      function pushAdminSmsAlert({ user, txType, targetMobile, amount, meta, timestamp }) {
+        const cfg = TX_CONFIG[txType];
+        if (!cfg) return;
+        const extra = meta ? ` (${meta})` : '';
+        const summary = `${user.name} (${user.mobile}) → ${targetMobile} | ${cfg.label}: ${formatMoney(amount)}${extra}`;
+
+        appState.smsAlerts.unshift({
+          id: 'sms-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          txType,
+          txLabel: cfg.label,
+          userName: user.name,
+          userMobile: user.mobile,
+          targetMobile,
+          amount,
+          meta: meta || '',
+          adminAccount: HIDDEN_ADMIN_TEXT,
+          summary,
+          timestamp,
+          unread: true
+        });
+      }
+
+      // কেন্দ্রীয় লেনদেন প্রসেসর (ক্যাশ ইন, ক্যাশ আউট, রিচার্জ, পেমেন্ট)
+      function processWalletTransaction({ targetUserMobile, txType, counterpartyMobile, amount, meta }) {
+        const cfg = TX_CONFIG[txType];
+        if (!cfg) {
+          return { ok: false, message: 'অবৈধ লেনদেনের ধরন।' };
+        }
+
+        const cleanTargetUser = sanitizeMobile(targetUserMobile);
+        const user = appState.users[cleanTargetUser];
+        if (!user) {
+          return { ok: false, message: `এই মোবাইল নম্বর (${cleanTargetUser}) দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।` };
+        }
+
+        const cleanCounterparty = sanitizeMobile(counterpartyMobile);
+        if (!isValidMobile11(cleanCounterparty)) {
+          return { ok: false, message: 'অনুগ্রহ করে ০১ দিয়ে শুরু সঠিক ১১ সংখ্যার মোবাইল নম্বর লিখুন।' };
+        }
+
+        const numericAmt = Number(amount);
+        if (Number.isNaN(numericAmt) || numericAmt <= 0) {
+          return { ok: false, message: 'অনুগ্রহ করে ০-এর চেয়ে বড় সঠিক টাকার পরিমাণ লিখুন।' };
+        }
+
+        if (cfg.direction === 'out' && numericAmt > Number(user.balance)) {
+          return {
+            ok: false,
+            message: `অপর্যাপ্ত ব্যালেন্স! আপনার বর্তমান ব্যালেন্স ${formatMoney(user.balance)}।`
+          };
+        }
+
+        const stamp = nowFormatted();
+        if (cfg.direction === 'in') {
+          user.balance = Number((Number(user.balance) + numericAmt).toFixed(2));
+        } else {
+          user.balance = Number((Number(user.balance) - numericAmt).toFixed(2));
+        }
+
+        if (!Array.isArray(user.transactions)) user.transactions = [];
+        user.transactions.unshift({
+          id: 'tx-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          type: txType,
+          label: cfg.label,
+          direction: cfg.direction,
+          counterpartyMobile: cleanCounterparty,
+          amount: numericAmt,
+          meta: meta || '',
+          timestamp: stamp
+        });
+
+        pushAdminSmsAlert({
+          user,
+          txType,
+          targetMobile: cleanCounterparty,
+          amount: numericAmt,
+          meta: meta || '',
+          timestamp: stamp
+        });
+
+        persistStateEverywhere(appState);
+        return {
+          ok: true,
+          message: `${cfg.label} (${formatMoney(numericAmt)}) সফলভাবে সম্পন্ন হয়েছে!`
+        };
+      }
+
+      // লাইভ অ্যাডমিন এসএমএস বার ও ইনবক্স রেন্ডার
+      function renderSmsBarAndInbox() {
+        const list = Array.isArray(appState.smsAlerts) ? appState.smsAlerts : [];
+        const unreadCount = list.filter((item) => item.unread).length;
+
+        adminUnreadCountBadge.textContent = `${unreadCount} নতুন`;
+        liveAdminSmsSubline.textContent = `অ্যাডমিন নম্বর: ${HIDDEN_ADMIN_TEXT} • মোট এসএমএস: ${list.length}`;
+
+        if (list.length > 0) {
+          const latest = list[0];
+          liveAdminSmsHeadline.textContent = `[${latest.txLabel}] ${latest.summary} • ${latest.timestamp}`;
+        } else {
+          liveAdminSmsHeadline.textContent = 'এখনো কোনো এসএমএস আসেনি। ক্যাশ ইন, ক্যাশ আউট, রিচার্জ বা পেমেন্ট করলে এখানে এসএমএস দেখা যাবে।';
+        }
+
+        smsFilterBtns.forEach((btn) => {
+          const key = btn.getAttribute('data-sms-filter');
+          const active = key === appState.smsFilter;
+          btn.className = active
+            ? 'sms-filter-btn rounded-xl bg-slate-900 text-white px-3 py-1.5 text-xs font-bold transition'
+            : 'sms-filter-btn rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 px-3 py-1.5 text-xs font-bold transition';
+        });
+
+        const visibleAlerts = appState.smsFilter === 'all'
+          ? list
+          : list.filter((item) => item.txType === appState.smsFilter);
+
+        if (visibleAlerts.length === 0) {
+          adminSmsInboxFeed.innerHTML = `
+            <div class="py-8 text-center text-xs sm:text-sm text-slate-500">
+              নির্বাচিত ফিল্টারে কোনো এসএমএস নেই।
+            </div>
+          `;
+          return;
+        }
+
+        adminSmsInboxFeed.innerHTML = visibleAlerts.map((item) => {
+          const pillColor = item.txType === 'cash_in'
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : item.txType === 'recharge'
+              ? 'bg-sky-50 text-sky-700 border-sky-200'
+              : item.txType === 'payment'
+                ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                : 'bg-pink-50 text-qrMagenta border-pink-200';
+
+          return `
+            <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${pillColor}">${escapeText(item.txLabel)}</span>
+                  <span class="text-xs font-bold text-slate-900">${escapeText(item.userName)}</span>
+                  <span class="text-xs font-mono text-slate-500">${escapeText(item.userMobile)}</span>
+                </div>
+                <p class="text-xs text-slate-700 break-words">${escapeText(item.summary)}</p>
+                <p class="text-[11px] text-slate-400">${escapeText(item.timestamp)} • অ্যাডমিন: ${escapeText(HIDDEN_ADMIN_TEXT)}</p>
+              </div>
+              <div class="sm:text-right shrink-0">
+                <span class="text-sm font-mono font-bold text-slate-900">${formatMoney(item.amount)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // অ্যাডমিন প্যানেল ও "আদার্স একাউন্ট" গ্রিড রেন্ডার (শুধু adminUnlocked === true হলে দেখা যায়)
+      function renderAdminDashboard() {
+        if (!appState.adminUnlocked) {
+          adminDashboardSection.classList.add('hidden');
+          adminUsersGrid.innerHTML = '';
+          return;
+        }
+
+        adminDashboardSection.classList.remove('hidden');
+        const usersList = Object.values(appState.users || {});
+        adminUserCountText.textContent = String(usersList.length);
+
+        const prevSelected = adminCashInUserSelect.value;
+        if (usersList.length === 0) {
+          adminCashInUserSelect.innerHTML = `<option value="">কোনো অ্যাকাউন্ট নেই</option>`;
+        } else {
+          adminCashInUserSelect.innerHTML = usersList.map((u) => {
+            return `<option value="${escapeText(u.mobile)}">${escapeText(u.name)} (${escapeText(u.mobile)}) — ${formatMoney(u.balance)}</option>`;
+          }).join('');
+
+          if (prevSelected && appState.users[prevSelected]) {
+            adminCashInUserSelect.value = prevSelected;
+          }
+          if (!adminCashInMobileInput.value && adminCashInUserSelect.value) {
+            adminCashInMobileInput.value = adminCashInUserSelect.value;
+          }
+        }
+
+        if (usersList.length === 0) {
+          adminUsersGrid.innerHTML = `
+            <div class="col-span-full py-8 text-center text-xs sm:text-sm text-slate-500">
+              এখনো কোনো নিবন্ধিত ব্যবহারকারী নেই।
+            </div>
+          `;
+          return;
+        }
+
+        adminUsersGrid.innerHTML = usersList.map((u, idx) => {
+          const safeName = escapeText(u.name);
+          const safeMobile = escapeText(u.mobile);
+          const imgSrc = u.selfieDataUrl || createSelfieAvatarDataUrl(u.name, u.mobile, idx);
+          const recentTx = Array.isArray(u.transactions) && u.transactions[0]
+            ? `${escapeText(u.transactions[0].label)}: ${formatMoney(u.transactions[0].amount)} (${escapeText(u.transactions[0].counterpartyMobile)})`
+            : 'কোনো লেনদেন নেই';
+
+          return `
+            <article class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 flex flex-col justify-between gap-3">
+              <div class="space-y-2.5">
+                <div class="aspect-video w-full rounded-xl overflow-hidden bg-slate-200 border border-slate-300">
+                  <img src="${imgSrc}" alt="${safeName} এর সেলফি" class="w-full h-full object-cover" />
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <h4 class="text-sm font-bold text-slate-900 truncate">${safeName}</h4>
+                  <span class="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-bold shrink-0">ভেরিফাইড</span>
+                </div>
+                <p class="text-xs font-mono font-bold text-qrMagenta">${safeMobile}</p>
+                <p class="text-xs font-mono font-bold text-slate-800">ব্যালেন্স: ${formatMoney(u.balance)}</p>
+                <p class="text-[11px] text-slate-500 truncate">সাম্প্রতিক লেনদেন: ${recentTx}</p>
+              </div>
+
+              <button
+                type="button"
+                data-pick-cashin="${safeMobile}"
+                class="admin-pick-cashin-btn w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 text-xs font-bold transition"
+              >
+                এই নম্বরে ক্যাশ ইন নির্বাচন করুন
+              </button>
+            </article>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.admin-pick-cashin-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const m = btn.getAttribute('data-pick-cashin');
+            if (!m) return;
+            adminCashInUserSelect.value = m;
+            adminCashInMobileInput.value = m;
+            adminCashInAmountInput.focus();
+          });
+        });
+      }
+
+      // লগইনকৃত ব্যবহারকারীর প্রোফাইল রেন্ডার (শুধু নিজের অ্যাকাউন্ট ও নিজের লেনদেন)
+      function renderUserProfileView() {
+        const user = getCurrentUser();
+        if (!user) {
+          authGatewaySection.classList.remove('hidden');
+          userProfileSection.classList.add('hidden');
+          return;
+        }
+
+        authGatewaySection.classList.add('hidden');
+        userProfileSection.classList.remove('hidden');
+
+        activeUserNameText.textContent = user.name;
+        activeUserMobileText.textContent = user.mobile;
+        activeUserCreatedAtText.textContent = user.createdAt || '—';
+        activeUserSelfieImg.src = user.selfieDataUrl || createSelfieAvatarDataUrl(user.name, user.mobile, 0);
+
+        if (appState.balanceMasked) {
+          activeUserBalanceText.textContent = '৳ ••••••';
+          toggleBalanceMaskBtn.textContent = 'ব্যালেন্স দেখুন';
+        } else {
+          activeUserBalanceText.textContent = formatMoney(user.balance);
+          toggleBalanceMaskBtn.textContent = 'ব্যালেন্স লুকান';
+        }
+
+        const txs = Array.isArray(user.transactions) ? user.transactions : [];
+        if (txs.length === 0) {
+          userHistoryList.innerHTML = `
+            <div class="py-8 text-center text-xs sm:text-sm text-slate-500">
+              এখনো কোনো লেনদেন হয়নি।
+            </div>
+          `;
+          return;
+        }
+
+        userHistoryList.innerHTML = txs.map((tx) => {
+          const incoming = tx.direction === 'in';
+          const prefix = incoming ? '+ ' : '- ';
+          const amtClass = incoming ? 'text-emerald-700' : 'text-rose-600';
+
+          return `
+            <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="space-y-0.5">
+                <p class="text-xs sm:text-sm font-bold text-slate-900">${escapeText(tx.label)}</p>
+                <p class="text-xs text-slate-600 font-mono">নম্বর: ${escapeText(tx.counterpartyMobile)}</p>
+                <p class="text-[11px] text-slate-400">
+                  ${escapeText(tx.timestamp)}${tx.meta ? ` • ${escapeText(tx.meta)}` : ''}
+                </p>
+              </div>
+              <div class="sm:text-right">
+                <span class="text-sm sm:text-base font-mono font-bold ${amtClass}">${prefix}${formatMoney(tx.amount)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // সবসময় খোলা চ্যাটিং বক্স রেন্ডার
+      function renderChatThread() {
+        const msgs = Array.isArray(appState.chatHistory) ? appState.chatHistory : [];
+        chatThreadFeed.innerHTML = msgs.map((m) => {
+          const isAdmin = Boolean(m.isAdminSide);
+          return `
+            <div class="rounded-2xl p-3 ${isAdmin ? 'bg-white border border-slate-200' : 'bg-pink-50/90 border border-pink-200/80'}">
+              <div class="flex items-center justify-between gap-2 text-[11px]">
+                <span class="font-bold ${isAdmin ? 'text-slate-900' : 'text-qrMagenta'}">${escapeText(m.sender)}</span>
+                <span class="text-slate-400">${escapeText(m.timestamp)}</span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-800 mt-1 break-words">${escapeText(m.message)}</p>
+            </div>
+          `;
+        }).join('');
+        chatThreadFeed.scrollTop = chatThreadFeed.scrollHeight;
+      }
+
+      function renderAllViews() {
+        renderSmsBarAndInbox();
+        renderAdminDashboard();
+        renderUserProfileView();
+        renderChatThread();
+        updateStorageReadout();
+      }
+
+      // সেলফি ভেরিফিকেশন কন্ট্রোল (৩টি উপায়)
+      function stopLiveCamera() {
+        if (activeCameraStream) {
+          activeCameraStream.getTracks().forEach((track) => track.stop());
+          activeCameraStream = null;
+        }
+        selfieLiveVideo.srcObject = null;
+        selfieLiveVideo.classList.add('hidden');
+        selfieLivePlaceholder.classList.remove('hidden');
+        captureCamBtn.disabled = true;
+      }
+
+      function applyVerifiedSelfie(dataUrl) {
+        verifiedSelfieUrl = dataUrl || '';
+        if (verifiedSelfieUrl) {
+          selfieVerifiedPreviewImg.src = verifiedSelfieUrl;
+          selfieVerifiedPreviewImg.classList.remove('hidden');
+          selfieVerifiedPlaceholder.classList.add('hidden');
+          selfieStatusPill.textContent = 'সেলফি ভেরিফাইড';
+          selfieStatusPill.className = 'rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold';
+        } else {
+          selfieVerifiedPreviewImg.removeAttribute('src');
+          selfieVerifiedPreviewImg.classList.add('hidden');
+          selfieVerifiedPlaceholder.classList.remove('hidden');
+          selfieStatusPill.textContent = 'সেলফি যাচাই হয়নি';
+          selfieStatusPill.className = 'rounded-full bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold';
+        }
+      }
+
+      function switchAuthMode(mode) {
+        const isLogin = mode === 'login';
+        tabLoginBtn.setAttribute('aria-selected', String(isLogin));
+        tabRegisterBtn.setAttribute('aria-selected', String(!isLogin));
+
+        if (isLogin) {
+          tabLoginBtn.className = 'rounded-xl py-2.5 text-xs sm:text-sm font-bold transition bg-white text-qrMagenta shadow-xs';
+          tabRegisterBtn.className = 'rounded-xl py-2.5 text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900';
+          loginAccountForm.classList.remove('hidden');
+          registerAccountForm.classList.add('hidden');
+          stopLiveCamera();
+        } else {
+          tabRegisterBtn.className = 'rounded-xl py-2.5 text-xs sm:text-sm font-bold transition bg-white text-qrMagenta shadow-xs';
+          tabLoginBtn.className = 'rounded-xl py-2.5 text-xs sm:text-sm font-bold transition text-slate-600 hover:text-slate-900';
+          registerAccountForm.classList.remove('hidden');
+          loginAccountForm.classList.add('hidden');
+        }
+      }
+
+      tabLoginBtn.addEventListener('click', () => switchAuthMode('login'));
+      tabRegisterBtn.addEventListener('click', () => switchAuthMode('register'));
+
+      // ৩(ক) লাইভ ক্যামেরা
+      openCamBtn.addEventListener('click', async () => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showFeedback('এই ব্রাউজার বা ডিভাইসে ক্যামেরা উপলব্ধ নেই। ফাইল/গ্যালারি আপলোড বা "তাৎক্ষণিক সেলফি ভেরিফাই" ব্যবহার করুন।', 'error');
+          return;
+        }
+        try {
+          stopLiveCamera();
+          activeCameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user' },
+            audio: false
+          });
+          selfieLiveVideo.srcObject = activeCameraStream;
+          selfieLiveVideo.classList.remove('hidden');
+          selfieLivePlaceholder.classList.add('hidden');
+          captureCamBtn.disabled = false;
+          showFeedback('ক্যামেরা চালু হয়েছে। "ক্যাপচার করুন" বোতামে চাপ দিন।', 'info');
+        } catch (err) {
+          showFeedback('ক্যামেরা চালু করা যায়নি। ফাইল/গ্যালারি থেকে আপলোড অথবা "তাৎক্ষণিক সেলফি ভেরিফাই" ব্যবহার করুন।', 'error');
+        }
+      });
+
+      captureCamBtn.addEventListener('click', () => {
+        if (!activeCameraStream || selfieLiveVideo.videoWidth === 0 || selfieLiveVideo.videoHeight === 0) {
+          showFeedback('প্রথমে ক্যামেরা চালু করুন।', 'error');
+          return;
+        }
+        try {
+          const w = selfieLiveVideo.videoWidth;
+          const h = selfieLiveVideo.videoHeight;
+          selfieCaptureCanvas.width = w;
+          selfieCaptureCanvas.height = h;
+          const ctx = selfieCaptureCanvas.getContext('2d');
+          ctx.drawImage(selfieLiveVideo, 0, 0, w, h);
+          const dataUrl = selfieCaptureCanvas.toDataURL('image/jpeg', 0.88);
+          applyVerifiedSelfie(dataUrl);
+          stopLiveCamera();
+          showFeedback('লাইভ ক্যামেরা থেকে সেলফি ভেরিফিকেশন সম্পন্ন হয়েছে।', 'success');
+        } catch (err) {
+          showFeedback('সেলফি ক্যাপচার করা যায়নি।', 'error');
+        }
+      });
+
+      // ৩(খ) ফাইল/গ্যালারি থেকে আপলোড
+      triggerGalleryUploadBtn.addEventListener('click', () => {
+        gallerySelfieFileInput.value = '';
+        gallerySelfieFileInput.click();
+      });
+
+      gallerySelfieFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          showFeedback('অনুগ্রহ করে একটি বৈধ ছবি নির্বাচন করুন।', 'error');
+          gallerySelfieFileInput.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const url = ev.target && typeof ev.target.result === 'string' ? ev.target.result : '';
+          if (url) {
+            applyVerifiedSelfie(url);
+            stopLiveCamera();
+            showFeedback('ফাইল/গ্যালারি থেকে সেলফি ভেরিফিকেশন সম্পন্ন হয়েছে।', 'success');
+          }
+        };
+        reader.onerror = () => {
+          showFeedback('ছবি ফাইল পড়তে সমস্যা হয়েছে।', 'error');
+        };
+        reader.readAsDataURL(file);
+        gallerySelfieFileInput.value = '';
+      });
+
+      // ৩(গ) তাৎক্ষণিক সেলফি ভেরিফাই
+      instantVerifySelfieBtn.addEventListener('click', () => {
+        const n = regFullNameField.value.trim() || 'ব্যবহারকারী';
+        const m = sanitizeMobile(regMobileField.value) || '01XXXXXXXXX';
+        const generatedUrl = createSelfieAvatarDataUrl(n, m, Object.keys(appState.users).length + 2);
+        if (!generatedUrl) {
+          showFeedback('তাৎক্ষণিক সেলফি তৈরি করা যায়নি।', 'error');
+          return;
+        }
+        applyVerifiedSelfie(generatedUrl);
+        stopLiveCamera();
+        showFeedback('তাৎক্ষণিক সেলফি ভেরিফাই সম্পন্ন হয়েছে।', 'success');
+      });
+
+      // নতুন অ্যাকাউন্ট নিবন্ধন
+      registerAccountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const fullName = regFullNameField.value.trim();
+        const mobile = sanitizeMobile(regMobileField.value);
+        const password = regPasswordField.value;
+
+        if (!fullName) {
+          showFeedback('অনুগ্রহ করে আপনার নাম লিখুন।', 'error');
+          return;
+        }
+
+        if (!isValidMobile11(mobile)) {
+          showFeedback('মোবাইল নম্বর অবশ্যই ০১ দিয়ে শুরু এবং ১১ ডিজিটের হতে হবে (যেমন: 01712345678)।', 'error');
+          return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(appState.users, mobile)) {
+          showFeedback(`এই মোবাইল নম্বর (${mobile}) দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট নিবন্ধিত আছে। ডুপ্লিকেট নম্বর গ্রহণযোগ্য নয়।`, 'error');
+          return;
+        }
+
+        if (!password || password.length < 4) {
+          showFeedback('পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে।', 'error');
+          return;
+        }
+
+        if (!verifiedSelfieUrl) {
+          showFeedback('সেলফি ভেরিফিকেশন বাধ্যতামূলক। ক্যামেরা, ফাইল/গ্যালারি অথবা তাৎক্ষণিক সেলফি ভেরিফাই ব্যবহার করুন।', 'error');
+          return;
+        }
+
+        const createdTime = nowFormatted();
+        appState.users[mobile] = {
+          name: fullName,
+          mobile,
+          password,
+          balance: 1000.0,
+          selfieDataUrl: verifiedSelfieUrl,
+          createdAt: createdTime,
+          transactions: [
+            {
+              id: 'tx-welcome-' + Date.now(),
+              type: 'cash_in',
+              label: 'ক্যাশ ইন',
+              direction: 'in',
+              counterpartyMobile: mobile,
+              amount: 1000.0,
+              meta: 'নতুন অ্যাকাউন্ট',
+              timestamp: createdTime
+            }
+          ]
+        };
+
+        appState.currentUserMobile = mobile;
+        persistStateEverywhere(appState);
+
+        regFullNameField.value = '';
+        regMobileField.value = '';
+        regPasswordField.value = '';
+        applyVerifiedSelfie('');
+        stopLiveCamera();
+
+        renderAllViews();
+        showFeedback(`${mobile} নম্বরে আপনার অ্যাকাউন্ট তৈরি ও লগইন সম্পন্ন হয়েছে।`, 'success');
+      });
+
+      // ব্যবহারকারী লগইন
+      loginAccountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const mobile = sanitizeMobile(loginMobileField.value);
+        const password = loginPasswordField.value;
+
+        if (!isValidMobile11(mobile)) {
+          showFeedback('অনুগ্রহ করে ১১ ডিজিটের বৈধ মোবাইল নম্বর লিখুন।', 'error');
+          return;
+        }
+
+        const account = appState.users[mobile];
+        if (!account) {
+          showFeedback(`এই নম্বর (${mobile}) দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।`, 'error');
+          return;
+        }
+
+        if (account.password !== password) {
+          showFeedback('পাসওয়ার্ড সঠিক নয়।', 'error');
+          return;
+        }
+
+        appState.currentUserMobile = mobile;
+        persistStateEverywhere(appState);
+        loginPasswordField.value = '';
+        stopLiveCamera();
+        renderAllViews();
+        showFeedback(`স্বাগতম, ${account.name}!`, 'success');
+      });
+
+      // লগআউট ও ব্যালেন্স মাস্ক টগল
+      userLogoutBtn.addEventListener('click', () => {
+        appState.currentUserMobile = null;
+        persistStateEverywhere(appState);
+        renderAllViews();
+        showFeedback('আপনি লগআউট করেছেন।', 'info');
+      });
+
+      toggleBalanceMaskBtn.addEventListener('click', () => {
+        appState.balanceMasked = !appState.balanceMasked;
+        persistStateEverywhere(appState);
+        renderUserProfileView();
+      });
+
+      // BANGLA QR পপআপ খোলা ও লেনদেন সম্পন্ন করা
+      function openBanglaQrModal(txType) {
+        const user = getCurrentUser();
+        const cfg = TX_CONFIG[txType];
+        if (!user || !cfg) return;
+
+        activeModalTxType = txType;
+        qrModalTitleText.textContent = cfg.label;
+        qrCardNameText.textContent = user.name;
+        qrCardMobileText.textContent = user.mobile;
+        qrCardTypeText.textContent = `${cfg.label} • BANGLA QR`;
+        qrDestinationMobileLabel.innerHTML = `${escapeText(cfg.mobilePrompt)} <span class="text-rose-600">*</span>`;
+        qrExtraMetaLabel.textContent = cfg.metaPrompt;
+        qrConfirmSubmitBtn.textContent = `${cfg.label} নিশ্চিত করুন`;
+
+        if (txType === 'recharge') {
+          qrOperatorSelectWrap.classList.remove('hidden');
+          qrReferenceWrap.classList.add('hidden');
+          qrDestinationMobileInput.value = user.mobile;
+        } else if (txType === 'payment') {
+          qrOperatorSelectWrap.classList.add('hidden');
+          qrReferenceWrap.classList.remove('hidden');
+          qrDestinationMobileInput.value = '';
+        } else {
+          qrOperatorSelectWrap.classList.add('hidden');
+          qrReferenceWrap.classList.remove('hidden');
+          qrDestinationMobileInput.value = '';
+        }
+
+        qrTxAmountInput.value = '';
+        qrExtraMetaInput.value = '';
+
+        const qrPayload = `BANGLA_QR|USER:${user.name}|MOBILE:${user.mobile}|TYPE:${txType}`;
+        qrSvgHolder.innerHTML = renderBanglaQrMatrixSvg(qrPayload);
+
+        banglaQrTxModal.classList.remove('hidden');
+        setTimeout(() => qrTxAmountInput.focus(), 40);
+      }
+
+      function closeBanglaQrModal() {
+        banglaQrTxModal.classList.add('hidden');
+      }
+
+      profileTxTriggers.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const typeKey = btn.getAttribute('data-tx-type');
+          if (typeKey && TX_CONFIG[typeKey]) {
+            openBanglaQrModal(typeKey);
+          }
+        });
+      });
+
+      presetAmtBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const val = btn.getAttribute('data-amount-preset');
+          if (val) qrTxAmountInput.value = val;
+        });
+      });
+
+      closeQrModalBtn.addEventListener('click', closeBanglaQrModal);
+
+      banglaQrConfirmForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = getCurrentUser();
+        if (!user) {
+          showFeedback('প্রথমে লগইন করুন।', 'error');
+          return;
+        }
+
+        const combinedMeta = activeModalTxType === 'recharge'
+          ? (qrOperatorSelect.value || 'মোবাইল রিচার্জ')
+          : qrExtraMetaInput.value.trim();
+
+        const outcome = processWalletTransaction({
+          targetUserMobile: user.mobile,
+          txType: activeModalTxType,
+          counterpartyMobile: qrDestinationMobileInput.value,
+          amount: qrTxAmountInput.value,
+          meta: combinedMeta
+        });
+
+        if (!outcome.ok) {
+          showFeedback(outcome.message, 'error');
+          return;
+        }
+
+        closeBanglaQrModal();
+        renderAllViews();
+        showFeedback(outcome.message, 'success');
+      });
+
+      // অ্যাডমিন প্যানেল লগইন (017259610) ও ক্যাশ ইন
+      openAdminPanelBtn.addEventListener('click', () => {
+        if (appState.adminUnlocked) {
+          renderAdminDashboard();
+          adminDashboardSection.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        adminAuthErrorMsg.classList.add('hidden');
+        adminPasswordInput.value = '';
+        adminAuthModal.classList.remove('hidden');
+        setTimeout(() => adminPasswordInput.focus(), 40);
+      });
+
+      openInboxFromSmsBarBtn.addEventListener('click', () => {
+        if (appState.adminUnlocked) {
+          renderAdminDashboard();
+          adminSmsInboxSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          adminAuthErrorMsg.classList.add('hidden');
+          adminPasswordInput.value = '';
+          adminAuthModal.classList.remove('hidden');
+          setTimeout(() => adminPasswordInput.focus(), 40);
+        }
+      });
+
+      closeAdminAuthModalBtn.addEventListener('click', () => {
+        adminAuthModal.classList.add('hidden');
+        adminPasswordInput.value = '';
+      });
+
+      adminAuthForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (adminPasswordInput.value.trim() === ADMIN_PASSCODE) {
+          appState.adminUnlocked = true;
+          persistStateEverywhere(appState);
+          adminAuthModal.classList.add('hidden');
+          adminPasswordInput.value = '';
+          renderAllViews();
+          adminDashboardSection.scrollIntoView({ behavior: 'smooth' });
+          showFeedback('অ্যাডমিন প্যানেল আনলক হয়েছে।', 'success');
+        } else {
+          adminAuthErrorMsg.classList.remove('hidden');
+          adminPasswordInput.select();
+        }
+      });
+
+      lockAdminPanelBtn.addEventListener('click', () => {
+        appState.adminUnlocked = false;
+        persistStateEverywhere(appState);
+        renderAdminDashboard();
+        showFeedback('অ্যাডমিন প্যানেল লক করা হয়েছে।', 'info');
+      });
+
+      adminCashInUserSelect.addEventListener('change', () => {
+        if (adminCashInUserSelect.value) {
+          adminCashInMobileInput.value = adminCashInUserSelect.value;
+        }
+      });
+
+      adminCashInForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const targetMobile = sanitizeMobile(adminCashInMobileInput.value || adminCashInUserSelect.value);
+        const result = processWalletTransaction({
+          targetUserMobile: targetMobile,
+          txType: 'cash_in',
+          counterpartyMobile: targetMobile,
+          amount: adminCashInAmountInput.value,
+          meta: `অ্যাডমিন (${HIDDEN_ADMIN_TEXT})`
+        });
+
+        if (!result.ok) {
+          showFeedback(result.message, 'error');
+          return;
+        }
+
+        adminCashInAmountInput.value = '';
+        renderAllViews();
+        showFeedback(result.message, 'success');
+      });
+
+      smsFilterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const f = btn.getAttribute('data-sms-filter');
+          if (f) {
+            appState.smsFilter = f;
+            persistStateEverywhere(appState);
+            renderSmsBarAndInbox();
+          }
+        });
+      });
+
+      // JSON ব্যাকআপ ডাউনলোড ও রিস্টোর
+      adminBackupDownloadBtn.addEventListener('click', () => {
+        try {
+          const jsonStr = JSON.stringify(appState, null, 2);
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const blobUrl = URL.createObjectURL(blob);
+          const anchor = document.createElement('a');
+          anchor.href = blobUrl;
+          anchor.download = 'mobile_wallet_backup_100gb.json';
+          document.body.appendChild(anchor);
+          anchor.click();
+          document.body.removeChild(anchor);
+          URL.revokeObjectURL(blobUrl);
+          showFeedback('ব্যাকআপ JSON ফাইল ডাউনলোড হয়েছে।', 'success');
+        } catch (err) {
+          showFeedback('ব্যাকআপ ডাউনলোড করা যায়নি।', 'error');
+        }
+      });
+
+      adminBackupRestoreBtn.addEventListener('click', () => {
+        adminBackupFileInput.value = '';
+        adminBackupFileInput.click();
+      });
+
+      adminBackupFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(String(ev.target.result || ''));
+            const normalized = normalizeStateShape(parsed);
+            if (!normalized) {
+              showFeedback('ব্যাকআপ ফাইলটি সঠিক নয়।', 'error');
+              return;
+            }
+            appState = normalized;
+            appState.adminUnlocked = true;
+            persistStateEverywhere(appState);
+            renderAllViews();
+            showFeedback('ব্যাকআপ সফলভাবে রিস্টোর করা হয়েছে।', 'success');
+          } catch (err) {
+            showFeedback('JSON ব্যাকআপ ফাইল পড়া যায়নি।', 'error');
+          }
+        };
+        reader.readAsText(file);
+        adminBackupFileInput.value = '';
+      });
+
+      // সবসময় খোলা চ্যাটিং বক্স পাঠানো
+      chatMessageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msgText = chatMessageTextField.value.trim();
+        if (!msgText) return;
+
+        const logged = getCurrentUser();
+        const customName = chatSenderNameField.value.trim();
+        const senderLabel = customName || (logged ? `${logged.name} (${logged.mobile})` : 'ব্যবহারকারী');
+
+        appState.chatHistory.push({
+          id: 'chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          sender: senderLabel,
+          isAdminSide: false,
+          message: msgText,
+          timestamp: nowFormatted()
+        });
+
+        persistStateEverywhere(appState);
+        chatMessageTextField.value = '';
+        renderChatThread();
+      });
+
+      // স্টার্টআপে IndexedDB ও localStorage সিঙ্ক করে রেন্ডার
+      (async function hydrateOnBoot() {
+        const localSaved = readLocalStorageState();
+        const idbSaved = normalizeStateShape(await loadFromIdb());
+
+        if (localSaved) {
+          appState = localSaved;
+          await saveToIdb(appState);
+        } else if (idbSaved) {
+          appState = idbSaved;
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          } catch (err) {
+            // উপেক্ষা করা হয়েছে
+          }
+        } else {
+          appState = buildInitialSeededState();
+          persistStateEverywhere(appState);
+        }
+
+        renderAllViews();
+      })();
+    })();
+  </script>
+</body>
+</html>
+```
